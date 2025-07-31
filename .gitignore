@@ -1,0 +1,90 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.env
+.idea
+
+# CrewAI specific files
+.crewai/
+crew_memory/
+training_data/
+*.crewai
+
+# AI/ML model files
+*.pkl
+*.joblib
+*.h5
+*.pb
+*.onnx
+models/
+checkpoints/
+
+# Log files and outputs
+*.log
+logs/
+outputs/
+results/
+reports/
+
+# Sensitive candidate data
+knowledge/resumes/*.pdf
+knowledge/linkedin/*.pdf
+knowledge/*/
+!knowledge/user_preference.txt
+!knowledge/.gitkeep
+
+# API keys and secrets
+.env.local
+.env.production
+secrets.json
+config.json
+credentials.json
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# OS specific files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE specific files
+.vscode/
+*.sublime-*
+.idea/
+*.iml
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Documentation builds
+docs/_build/
+site/
+
+# UV package manager
+.uv_cache/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3

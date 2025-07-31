@@ -1,0 +1,249 @@
+cv_analysis_task:
+  description: >
+    Read the CV PDF at {cv_file_path} and extract structured JSON with the following keys:
+      - name: string
+      - skills: list of strings
+      - experience: list of {company, role, start_date, end_date, description}
+      - education: list of {institution, degree, start_year, end_year}
+      - projects: list of {title, year, description}
+      - certifications: list of {name, issuer, date}
+
+    IMPORTANT RULES:
+    - Only extract information that is extracted from the cv pdf.
+    - Do NOT guess or infer missing details or infer .
+    - If a field is missing, return it as an empty string or empty list.
+    - Preserve the exact wording from the CV where possible.
+    - The output must be valid JSON.
+
+    After extracting the structured data, compare the skills and experience against 
+    the provided job description: {job_description}.
+    Calculate:
+      - confidence_score: integer between 1 and 100
+      - explanation: concise reasoning for the score, citing exact matches or gaps.
+  expected_output: >
+    {
+      "structured_data": {
+        "contact": {
+          "email": "email@example.com",
+          "phone": "+1 000-000-0000",
+          "location": "City, State, Country",
+          "websites": [
+            {
+              "name": "Portfolio/github",
+              "url": "https://portfolio.com"
+            },
+            {
+              "name": "LinkedIn",
+              "url": "https://linkedin.com/in/username"
+            }
+          ]
+        },
+        "skills": [
+          "Python",
+          "Django"
+        ],
+        "experience": [
+          {
+            "company": "ABC Corp",
+            "role": "Developer",
+            "start_date": "2019",
+            "end_date": "2022",
+            "description": "Worked on APIs"
+          }
+        ],
+        "education": [
+          {
+            "institution": "XYZ University",
+            "degree": "BSc Computer Science",
+            "start_year": "2015",
+            "end_year": "2019"
+          }
+        ],
+        "certifications": [
+          {
+            "name": "Certification Name",
+            "issuer": "Organization",
+            "date": "YYYY-MM"
+          }
+        ],
+        "projects": [
+          {
+            "title": "Project Name",
+            "year": "YYYY",
+            "description": "Brief project description and outcome."
+          }
+        ],
+      }
+    }
+
+linkedin_analysis_task:
+  description: >
+    Read the LinkedIn profile PDF at {linkedin_file_path} and extract structured JSON 
+    with the following keys:
+      - name: string
+      - skills: list of strings
+      - experience: list of {company, role, start_date, end_date, description}
+      - education: list of {institution, degree, start_year, end_year}
+      - projects: list of {title, year, description}
+      - achievements: list of strings,
+      - certifications: list of {name, issuer, date}
+
+    IMPORTANT RULES:
+    - Only extract information explicitly stated in the LinkedIn profile text.
+    - Do NOT guess or infer missing details.
+    - If a field is missing, return it as an empty string or empty list.
+    - Preserve the exact wording from the LinkedIn profile where possible.
+    - The output must be valid JSON.
+
+  expected_output: >
+    {
+      "structured_data": {
+        "contact": {
+          "email": "email@example.com",
+          "phone": "+1 000-000-0000",
+          "location": "City, State, Country",
+          "websites": [
+            {
+              "name": "Portfolio/github",
+              "url": "https://portfolio.com"
+            },
+            {
+              "name": "LinkedIn",
+              "url": "https://linkedin.com/in/username"
+            }
+          ]
+        },
+        "skills": [
+          "Python",
+          "Django"
+        ],
+        "experience": [
+          {
+            "company": "ABC Corp",
+            "role": "Developer",
+            "start_date": "2019",
+            "end_date": "2022",
+            "description": "Worked on APIs"
+          }
+        ],
+        "education": [
+          {
+            "institution": "XYZ University",
+            "degree": "BSc Computer Science",
+            "start_year": "2015",
+            "end_year": "2019"
+          }
+        ],
+        "certifications": [
+          {
+            "name": "Certification Name",
+            "issuer": "Organization",
+            "date": "YYYY-MM"
+          }
+        ],
+        "projects": [
+          {
+            "title": "Project Name",
+            "year": "YYYY",
+            "description": "Brief project description and outcome."
+          }
+        ],
+        "endorsements": [
+          "Python",
+          "Machine Learning"
+        ]
+      }
+    }
+
+verification_task:
+  description: >
+    Compare structured JSON data from the CV Analyst and LinkedIn Agent to identify
+    similarities and differences in:
+      - Name and Contact Information
+      - Job Titles and Companies
+      - Employment Periods
+      - Skills
+      - Education
+      - Certifications
+      - Achievements
+      - Projects (if available)
+    .Compare each LinkedIn profile to the CV across:
+         – Name (use fuzzy string matching to account for variations)
+         – Company names (normalized for common suffixes, lexical variations)
+         – Employment periods (reflect overlap tolerance in dates)
+         – Skills (calculate overlap percentage)
+         – Profile completeness (how many fields present) and also
+    giving higher weight to skills, experience, and education, certifications and projects.
+    Provide a detailed explanation for the score, citing exact matches and mismatches.
+
+    IMPORTANT RULES:
+    - Only use the provided structured JSON outputs from the CV Analyst and LinkedIn Agent.
+    - Do NOT guess or infer missing information.
+    - Mark any absent values as "Not Found".
+    - Always provide the exact values from both sources when reporting discrepancies.
+    - Matching score must be calculated using a consistent and transparent formula.
+    - Give a clear, evidence-based explanation for the score.
+    - If a field is present in one source and missing in the other, treat it as a mismatch.
+    - Never hallucinate new data or modify existing values.
+
+  expected_output: >
+    {
+      "matching_score": 0-100,
+    "breakdown": {
+               "name": { "score": "0‑1", "detail": "string" },
+               "company": { "score": "0‑1", "detail": "string" },
+               "date_range": { "score": "0‑1", "detail": "string" },
+               "skills": { "score": "0‑1", "detail": "string" },
+               "completeness": { "score": "0‑1", "detail": "string" }
+             },
+      "explanation": "Detailed reasoning of how the score was calculated,
+                      listing each field comparison, highlighting matches
+                      and mismatches.",
+      "discrepancies": [
+        {
+          "field": "string",
+          "cv_value": "string or null",
+          "linkedin_value": "string or null",
+          "issue": "Mismatch / Missing in LinkedIn / Missing in CV"
+        }
+      ]
+    }
+    
+final_decision_task:
+  description: >
+    Review the structured results from the CV Analysis Agent and the Verification Agent. 
+    You will be provided with:
+    - confidence_score: numeric confidence level from CV analysis
+    - matching_score: numeric match percentage with job requirements
+    - discrepancies: list of issues or mismatches detected
+    - explanations: reasoning from earlier agents
+
+    Your task is to make the final decision without re-analyzing the original CV or LinkedIn profile.  
+    Use ONLY the provided numeric scores and explanations.  
+    If any expected data is missing or unclear, explicitly note this in your reasoning.
+
+    IMPORTANT:
+    - ONLY use provided numeric scores and explanations.
+    - Do not speculate or infer missing details.
+    - NEVER add, infer, or fabricate other information.
+    - NEVER make assumptions about the candidate's background or qualifications.
+    - If information is missing or unclear, explicitly note it in your decision justification.
+    - Your decision must be completely transparent and based on structured evidence.
+
+  expected_output: >
+    {
+      "verdict": "Select/Reject",
+      "justification": "Detailed reasoning based on analysis",
+      "confidence_score": 85,
+      "matching_score": 78,
+      "discrepancies": [
+        {
+          "field": "experience",
+          "cv_value": "5 years",
+          "linkedin_value": "4 years",
+          "issue": "Mismatch"
+        }
+      ]
+    }
+
+    

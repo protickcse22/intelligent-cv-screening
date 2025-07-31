@@ -1,0 +1,25 @@
+[project]
+name = "intelligent_cv_screening"
+version = "0.1.0"
+description = "intelligent-cv-screening using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]>=0.150.0,<1.0.0",
+    "pymupdf>=1.26.3",
+    "pyyaml>=6.0.2",
+]
+
+[project.scripts]
+intelligent_cv_screening = "intelligent_cv_screening.main:run"
+run_crew = "intelligent_cv_screening.main:run"
+train = "intelligent_cv_screening.main:train"
+replay = "intelligent_cv_screening.main:replay"
+test = "intelligent_cv_screening.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
