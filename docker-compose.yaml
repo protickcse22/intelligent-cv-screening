@@ -1,65 +1,58 @@
 services:
-  postgres:
-    image: postgres:latest
-    container_name: odoo_postgres_db
-    restart: always
+  db:
+    image: postgres:13
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: protick1234
-      POSTGRES_DB: odoo_hr_db
-    ports:
-      - "5432:5432"
+      - POSTGRES_DB=odoo_hr_db
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo123
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - ./data/db:/var/lib/postgresql/data
+    restart: always
     networks:
-      - odoo_network
+      - odoo-network
 
   odoo:
-    image: odoo:latest
+    image: odoo:17
     container_name: odoo_app
-    restart: always
     depends_on:
-      - postgres
+      - db
     ports:
       - "8069:8069"
     environment:
-      - HOST=postgres
+      - HOST=db
       - USER=odoo
       - PASSWORD=odoo123
-      - POSTGRES_DB=odoo_hr_db
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
+      - DB_NAME=odoo_hr_db
     volumes:
-      - odoo-web-data:/var/lib/odoo
+      - ./data/odoo:/var/lib/odoo
       - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
-      - ./addons:/mnt/extra-addons
-    # Remove the problematic command and let Odoo use the config file
+      - ./addons:/mnt/extra-addons:ro
+    restart: always
     networks:
-      - odoo_network
+      - odoo-network
+    command: ["odoo", "-i", "base,hr,hr_recruitment", "-d", "odoo_hr_db", "--db_host=db", "--db_user=odoo", "--db_password=odoo123", "--without-demo=all"]
 
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: odoo_pgadmin
-    restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: AdminPass123
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "3000:80"
+      - "5050:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - odoo-network
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-    networks:
-      - odoo_network
 
 volumes:
-  pgdata:
   pgadmin-data:
-  odoo-web-data:
+    driver: local
 
 networks:
-  odoo_network:
+  odoo-network:
     driver: bridge
-    name: odoo_network
